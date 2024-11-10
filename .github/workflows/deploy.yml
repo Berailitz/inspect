@@ -3,7 +3,7 @@ name: deploy
 on:
   workflow_dispatch:
   push:
-    branches: ['main']
+    branches: ['private']
     paths-ignore:
       - 'README.md'
 
@@ -26,17 +26,12 @@ jobs:
 
       - run: pnpm exec tsx ./scripts/updateVersion.ts
       - run: pnpm run build:mirror
-      - name: Publish package
-        run: |
-          pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          pnpm publish --no-git-checks
 
       - run: git checkout .
-      - run: curl -X PUT 'https://registry-direct.npmmirror.com/@gkd-kit/inspect/sync'
 
       - uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: gkd-inspect
+          projectName: private-gkd-inspect
           directory: dist
